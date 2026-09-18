@@ -1,311 +1,313 @@
-# Darukaa Earth — AI Biodiversity Intelligence
-🌐 Live Demo: https://earth-1-g0v1.onrender.com/
+# Darukaa.Earth
 
-An evidence-grounded environmental intelligence system, built for the Darukaa.Earth
-hackathon challenge. It behaves like an AI environmental scientist: it retrieves
-scientific knowledge, reasons across multiple environmental variables through a
-structured relationship graph, and produces actionable, evidence-verified
-biodiversity recommendations — never a single-variable, generic chatbot answer.
+AI-powered biodiversity and environmental intelligence system that combines structured environmental data, retrieval-augmented generation, scientific evidence, and multi-metric reasoning to generate actionable ecological recommendations.
 
-## Why this is not a generic LLM chatbot
+Live Demo:
+https://earth-1-g0v1.onrender.com/
 
-1. **Recommendations are never produced by "asking the LLM to reason."** A
-   deterministic rule engine (`backend/app/services/reasoning.py`) evaluates the
-   user's environmental state against thresholds, then traverses a stored
-   relationship graph (`environmental_relationships` table) to find causal chains
-   connecting ≥3 metrics. The LLM, when configured, is used only to phrase
-   already-derived reasoning — it cannot invent relationships.
-2. **Every scientific claim must trace to retrieved evidence.** The retrieval
-   layer (TF-IDF vector search + metadata filtering + similarity threshold) feeds
-   an evidence verification stage (`backend/app/services/evidence.py`) that
-   rejects recommendations with no supporting evidence and strips any numeric
-   claim not found verbatim in the retrieved text.
-3. **The system asks for missing information instead of guessing.** Structured
-   environmental state + missing-field detection (spec section 3) means a vague
-   message like *"biodiversity is declining on my land"* gets clarifying
-   questions, not a generic answer.
-4. **The knowledge base is real and inspectable**, not a black box — the Evidence
-   Explorer and Reasoning Graph pages let a judge see exactly which sources and
-   which causal edges produced a given recommendation.
+Backend API:
+https://earth-jtl9.onrender.com/
 
-## Architecture
+API Documentation:
+https://earth-jtl9.onrender.com/docs
 
-```
-User (chat or structured JSON)
-        │
-        ▼
-Environmental State Extraction  (app/services/conversation.py)
-        │
-        ▼
-Missing-Information Detection
-        │
-        ▼
-Query Expansion  →  TF-IDF Embedding  →  Vector Search  →  Metadata Filtering
-        │                                  (app/services/retrieval.py)
-        ▼
-Deterministic Multi-Metric Reasoning  (app/services/reasoning.py — graph traversal)
-        │
-        ▼
-Recommendation Generation  (app/services/recommendations.py — evidence per intervention)
-        │
-        ▼
-Evidence Verification  (app/services/evidence.py — rejects unsupported claims)
-        │
-        ▼
-Structured JSON Response  →  Frontend (Dashboard / Chat / Profile / Evidence / Graph)
-```
+GitHub:
+https://github.com/srinithi5011/earth
 
-Full pipeline orchestration lives in `backend/app/services/rag.py`.
 
-### A note on the embedding backend
+## Overview
 
-This project was built and packaged in a sandboxed environment **with no network
-access**, so an internet-downloaded sentence-embedding model was not an option
-for the default configuration. The default embedding backend is therefore a
-**TF-IDF vectorizer (scikit-learn)** fit over the ingested corpus — a real,
-working, fully offline vector search, not a stub. It satisfies every pipeline
-requirement (embedding generation, vector search, similarity threshold,
-metadata filtering, ranking, dedup) without any external dependency.
+Darukaa.Earth is designed as an AI environmental scientist rather than a generic chatbot.
 
-To use a stronger embedding model in production, implement the
-`EmbeddingBackend` protocol in `backend/app/services/embeddings.py` for your
-model of choice and switch `EMBEDDING_MODEL` in `.env` — the rest of the
-pipeline (retrieval, reasoning, recommendations) is unaffected by this swap.
+The system takes environmental conditions such as soil health, rainfall, land use, biodiversity, water availability, temperature, and human impact, then reasons across relationships between these variables.
 
-### A note on the knowledge corpus
+Instead of generating recommendations only from an LLM, the system:
 
-The seeded knowledge base (`data/seed/*.json`) is intentionally labeled
-**"Darukaa Earth Curated Knowledge Base"** rather than attributed to invented
-FAO/IPCC/IPBES paper titles or fabricated URLs — per the hackathon's own
-anti-hallucination rules, this system never fabricates papers, authors, or
-statistics. The seed content reflects well-established, general environmental
-science consensus, with source URLs pointing at the relevant organization's
-real public portal (e.g. `fao.org/soils-portal`), not a specific paper.
+1. Extracts environmental conditions from the user's query.
+2. Identifies missing information when the query is incomplete.
+3. Expands the query into related environmental concepts.
+4. Retrieves relevant knowledge from the environmental knowledge base.
+5. Builds relationships between environmental variables.
+6. Generates recommendations using deterministic scientific reasoning.
+7. Grounds recommendations using retrieved evidence.
+8. Returns structured environmental assessment and recommendation data.
 
-**Before a real deployment**, ingest actual FAO/IPCC/UNEP/IPBES/NASA/USGS PDFs
-or reports via `POST /api/knowledge/ingest` or `scripts/ingest.py` — the
-ingestion pipeline (PDF/TXT/MD/CSV/JSON) is fully implemented and ready for
-real source documents, at which point recommendations will cite those specific
-documents instead.
+The goal is to provide recommendations that are specific, explainable, and connected to measurable environmental outcomes.
 
-## Database schema
 
-SQLAlchemy models in `backend/app/models/`:
+## Why Darukaa.Earth
 
-| Table | Purpose |
-|---|---|
-| `users` | Session → user mapping |
-| `conversations` | Multi-turn conversation + accumulated environmental state |
-| `messages` | Individual chat turns, with structured response attached |
-| `environmental_profiles` | Persisted structured environmental snapshots |
-| `knowledge_documents` | Ingested source documents with full metadata |
-| `knowledge_chunks` | Chunked, embedded text with denormalized metadata for fast filtering |
-| `environmental_relationships` | The reasoning engine's knowledge graph edges |
-| `recommendations` / `recommendation_evidence` | Persisted structured recommendations + their evidence |
+Environmental problems are interconnected.
 
-Runs on **SQLite by default** (zero infrastructure — `data/darukaa.db`) and on
-**PostgreSQL + pgvector** in the Docker Compose path (`database/init.sql`
-provisions the `vector` extension and an `ivfflat` index). The same SQLAlchemy
-models work against both; only the embedding column's physical type and index
-differ.
+For example:
 
-## Local setup (no Docker, SQLite, fastest way to try it)
+Low soil organic carbon + low rainfall + monoculture
 
-Requires network access to install dependencies (the sandbox this was authored
-in did not have this — these commands are unverified end-to-end in this
-environment, see **Verification status** below).
+can affect:
 
-```bash
-# Backend
-cd backend
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp ../.env.example ../.env   # DEMO_MODE=true by default — no LLM_API_KEY needed
-cd ..
-python scripts/seed.py       # loads the curated knowledge corpus + relationship graph
-cd backend
-uvicorn app.main:app --reload --port 8000
+- Soil health
+- Water retention
+- Vegetation diversity
+- Habitat quality
+- Biodiversity
 
-# Frontend (separate terminal)
-cd frontend
-npm install
-echo "VITE_API_URL=http://localhost:8000" > .env
-npm run dev
-```
+A useful environmental system therefore needs to reason across multiple variables instead of treating each metric independently.
 
-Open `http://localhost:5173`.
+Darukaa.Earth uses a relationship-based reasoning layer to connect these environmental factors and generate interventions such as:
 
-## Docker setup
+- Cover crops
+- Crop rotation
+- Residue retention
+- Intercropping
+- Agroforestry
+- Native vegetation strips
+- Water retention practices
 
-```bash
-cp .env.example .env
-docker compose up --build
-```
 
-This starts `postgres` (with pgvector), `backend` (auto-seeds the knowledge base
-on first boot via `backend/entrypoint.sh`), and `frontend`. Backend on
-`localhost:8000`, frontend on `localhost:5173`.
+## Core Features
 
-## Environment variables
+### Environmental conversation
 
-See `.env.example` for the full, commented list. Key ones:
+Users can describe an ecosystem or environmental situation using natural language.
 
-| Variable | Purpose | Required? |
-|---|---|---|
-| `DATABASE_URL` | SQLite (local) or Postgres (Docker) connection string | Yes (has a default) |
-| `DEMO_MODE` | Forces deterministic templates, no external LLM calls | No (defaults true) |
-| `LLM_API_KEY` | Anthropic/OpenAI key — leave blank to run fully offline | No |
-| `LLM_PROVIDER` / `LLM_MODEL` | Which provider/model to call if a key is set | No |
-| `EMBEDDING_MODEL` | `tfidf` (default, offline) or a real model name | No |
+Example:
 
-Never commit a real `.env` — only `.env.example` is checked in.
+"My farm is in a semi-arid region. Soil organic carbon is 0.3%, rainfall is low, and I have been growing wheat as a monoculture for several years. What should I do to improve soil health and biodiversity?"
 
-## Data ingestion
+The system extracts the relevant environmental conditions and reasons over them.
 
-```bash
-python scripts/ingest.py path/to/report.pdf \
-  --title "Soil Carbon in Semi-Arid Systems" \
-  --organization "FAO" \
-  --publication-year 2023 \
-  --source-url "https://fao.org/..." \
-  --document-type report \
-  --topic soil \
-  --region "east africa" \
-  --credibility-tier authoritative
-```
+### Multi-metric reasoning
 
-Or via the API: `POST /api/knowledge/ingest` (multipart form upload).
+The system connects multiple environmental variables instead of providing isolated recommendations.
 
-## Running tests
+Examples include:
 
-```bash
-cd backend
-pytest
-```
+- Soil organic carbon → soil health → vegetation growth
+- Rainfall → water availability → ecological stress
+- Monoculture → vegetation diversity → habitat quality
+- Land fragmentation → habitat connectivity → biodiversity
+- Temperature → climate stress → water demand
 
-Covers: environmental extraction, chunking, deterministic reasoning
-(multi-metric chain construction), retrieval (vector search + metadata
-filtering + similarity threshold), evidence verification (anti-hallucination
-checks on numeric claims), and full API integration tests for `/api/chat`,
-`/api/analyze`, `/api/evidence`, `/api/relationships`, and conversation
-persistence.
+### Evidence-grounded recommendations
 
-## Evaluation
+Recommendations are linked to retrieved knowledge from the system's environmental knowledge base.
 
-```bash
-python scripts/seed.py     # if not already seeded
-python scripts/evaluate.py
-```
+Each recommendation can include:
 
-Runs 11 environmental scenarios (the 10 required by the spec, plus a vague-input
-missing-information-detection case) and reports retrieval relevance, evidence
-coverage, multi-metric reasoning rate, recommendation specificity, citation
-presence, and missing-information-detection accuracy.
+- Recommendation
+- Scientific reasoning
+- Affected environmental metrics
+- Expected effect
+- Time horizon
+- Confidence
+- Supporting evidence
 
-## Demo scenario (spec section 17)
+### Missing information detection
 
-Input: `Soil organic carbon is 0.3%, rainfall is low, I grow monoculture wheat in a semi-arid region.`
+The system does not automatically assume that missing environmental measurements are known.
 
-Expected flow: the system detects low soil carbon + low rainfall + monoculture,
-traces the relationship chain (soil carbon → water retention → plant resilience;
-monoculture → habitat diversity → species richness), and returns cover-crop /
-crop-rotation / agroforestry-style recommendations, each with affected metrics,
-time horizons, evidence, and an Evidence Confidence label — never a bare "use
-sustainable farming."
+For example, if biodiversity is not directly measured, the system can report:
 
-## API endpoints
+"Insufficient Data"
 
-| Method | Path | Purpose |
-|---|---|---|
-| POST | `/api/chat` | Main conversational turn (NL + optional structured input) |
-| POST | `/api/analyze` | Structured-input-only variant, no NL |
-| GET | `/api/conversations/{id}` | Full conversation + accumulated state |
-| POST | `/api/environment` | Save an environmental profile snapshot |
-| GET | `/api/environment/{id}` | Retrieve a saved profile |
-| GET | `/api/evidence` | Evidence Explorer data (filterable by topic/region/org) |
-| GET | `/api/evidence/documents` | List ingested source documents |
-| POST | `/api/knowledge/ingest` | Ingest a new document (PDF/TXT/MD/CSV/JSON) |
-| GET | `/api/relationships` | Full reasoning-graph edge list |
-| GET | `/api/health` | Health check (DB connectivity, demo mode, vector backend) |
+and identify useful measurements such as:
 
-Interactive docs at `/docs` (FastAPI auto-generated).
+- Species richness
+- Habitat diversity
+- Pollinator diversity
+- Vegetation diversity
 
-## Verification status (read this)
+This helps distinguish between measured environmental conditions and inferred ecological risk.
 
-This project was built in a sandboxed authoring environment **without network
-access** — `pip install` and `npm install` could not be run there, so the
-Python and TypeScript/React code could not be executed or dependency-checked
-end-to-end in that environment. What **was** verified there:
+### Structured output
 
-- Every Python file passes `python -m py_compile` (no syntax errors).
-- Every JSON seed file passes `json.load` (valid JSON, matches expected schema).
-- The overall control flow, imports, and function signatures were manually
-  cross-checked module-by-module for consistency (e.g. `retrieve()`'s return
-  type matches what `recommendations.py` and `rag.py` consume).
+The backend returns structured JSON containing:
 
-What **was not** verified there and needs to happen once you have network
-access (CI or your own machine) — this is real, standard first-run
-verification, not a hidden gap:
+- Environmental assessment
+- Recommendations
+- Evidence
+- Reasoning
+- Affected metrics
+- Time horizons
+- Confidence
+- Uncertainty information
 
-- `pip install -r backend/requirements.txt` and `npm install` in `frontend/`
-- `pytest` actually passing (tests are written against the real modules, but
-  never executed)
-- `docker compose up --build` end-to-end
-- `npm run build` for the frontend TypeScript compile
+This allows the frontend to present the same reasoning in different visual formats.
 
-If anything fails on first run, it's most likely a minor import-order or
-dependency-pin issue — the architecture and logic have been through the design
-and static-check pass described above, but not a live execution pass.
 
-## Limitations
+## System Architecture
 
-- Default embedding backend (TF-IDF) is weaker than a modern sentence-embedding
-  model for paraphrase-heavy queries; swap it for production use (see above).
-- The seeded knowledge corpus is a small, honestly-labeled curated set, not a
-  full ingested FAO/IPCC/IPBES library — ingest real documents before relying
-  on this for real recommendations.
-- Natural-language environmental state extraction is regex/keyword-based for
-  guaranteed offline operation; an LLM-assisted extraction path exists
-  (`app/services/llm.py`) and activates automatically once `LLM_API_KEY` is set
-  and `DEMO_MODE=false`, improving extraction on more free-form phrasing.
-- Geospatial input (lat/lon) is accepted and stored but no external geospatial
-  API is integrated, per the spec's constraint that external APIs must not be
-  mandatory for the core demo.
-- pgvector `ivfflat` index dimension (4096, matching the default TF-IDF
-  `max_features`) should be tuned down if you reduce `max_features` or swap to
-  a lower-dimensional embedding model.
+The system follows this pipeline:
 
-## Future improvements
+User Query
+    |
+    v
+Environmental Information Extraction
+    |
+    v
+Missing Information Detection
+    |
+    v
+Query Expansion
+    |
+    v
+Knowledge Retrieval
+    |
+    v
+Environmental Reasoning
+    |
+    v
+Recommendation Generation
+    |
+    v
+Evidence Verification
+    |
+    v
+Structured API Response
+    |
+    v
+React Frontend
 
-- Swap TF-IDF for a production sentence-embedding model + pgvector HNSW index.
-- Expand the relationship graph and intervention-category rule set with
-  domain-expert review.
-- Add authentication for multi-tenant deployments (currently session-based,
-  single-tenant-friendly).
-- Add streaming responses for the chat endpoint.
-- Expand evaluate.py into a CI gate with pass/fail thresholds per metric.
 
-## Project structure
+## Technology Stack
 
-```
-darukaa-earth/
-├── frontend/            React + TypeScript + Vite + Tailwind (5 pages)
-├── backend/
-│   └── app/
-│       ├── api/          chat, environment, evidence, relationships, health
-│       ├── models/       SQLAlchemy ORM (conversation, knowledge, recommendation, ...)
-│       ├── schemas/      Pydantic (environment, chat)
-│       ├── services/     rag, reasoning, recommendations, evidence, retrieval,
-│       │                 embeddings, conversation, llm
-│       ├── knowledge/    ingestion, chunking, embeddings (re-export)
-│       ├── prompts/      one file per LLM prompt stage
-│       └── tests/
-├── data/
-│   ├── seed/              curated knowledge corpus + relationship graph JSON
-│   └── processed/         generated TF-IDF vectorizer (gitignored)
-├── database/init.sql       pgvector schema setup
-├── scripts/                seed.py, ingest.py, evaluate.py
-├── docker-compose.yml
-├── .env.example
-└── README.md   (this file)
-```
+Frontend
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+- Mapbox GL
+- Leaflet
+
+Backend
+
+- Python
+- FastAPI
+- SQLAlchemy
+- Pydantic
+
+AI and Retrieval
+
+- Retrieval-Augmented Generation
+- TF-IDF based retrieval
+- Structured environmental knowledge base
+- Deterministic environmental reasoning
+- Optional LLM-based response phrasing
+
+Database
+
+- SQLite for local development
+- PostgreSQL for production-style deployment
+- pgvector support for vector-based retrieval
+
+Deployment
+
+- Render
+- Docker
+- GitHub
+
+
+## Knowledge System
+
+The knowledge system stores environmental information as structured chunks.
+
+Each knowledge chunk can contain:
+
+- Title
+- Organization
+- Source URL
+- Publication year
+- Document type
+- Environmental metrics
+- Text content
+- Metadata
+
+The current seeded dataset is the Darukaa Earth Curated Knowledge Base.
+
+The architecture supports ingesting additional scientific reports, research papers, environmental datasets, and institutional publications.
+
+
+## Retrieval
+
+The current local retrieval implementation uses TF-IDF.
+
+The retrieval process is:
+
+1. User query is received.
+2. Environmental concepts are extracted.
+3. Related terms are added through query expansion.
+4. Knowledge chunks are compared against the expanded query.
+5. Relevant chunks are selected.
+6. Retrieved evidence is passed into the reasoning and recommendation pipeline.
+
+The system is designed so that the retrieval layer can be replaced or extended with embedding-based vector search.
+
+
+## Environmental Reasoning
+
+The reasoning layer evaluates environmental conditions and identifies relevant intervention categories.
+
+Examples:
+
+Soil organic carbon
+
+Low SOC can trigger:
+
+- Cover crops
+- Crop rotation
+- Residue retention
+
+Monoculture
+
+Monoculture can trigger:
+
+- Intercropping
+- Crop rotation
+- Agroforestry
+- Native vegetation strips
+
+Low rainfall
+
+Low rainfall can trigger:
+
+- Water retention
+- Agroforestry
+- Drought-tolerant cover crops
+
+The reasoning layer also creates relationships between environmental variables.
+
+Example:
+
+Soil organic carbon
+    |
+    v
+Soil health
+    |
+    v
+Vegetation growth
+    |
+    v
+Habitat quality
+    |
+    v
+Biodiversity
+
+
+## Recommendation Structure
+
+A recommendation returned by the system contains information such as:
+{
+  "recommendation": "Introduce cover crops",
+  "scientific_reasoning": "Cover crops can increase organic matter inputs and improve soil structure.",
+  "affected_metrics": [
+    "soil.organic_carbon",
+    "soil.health",
+    "water.retention"
+  ],
+  "time_horizon": "1-3 years",
+  "expected_effect": "Improved soil organic matter and water retention",
+  "confidence": 0.8,
+  "evidence": []
+}
