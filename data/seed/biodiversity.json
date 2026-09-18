@@ -1,0 +1,54 @@
+[
+  {
+    "title": "Monoculture Cropping and Habitat Diversity — Curated Summary",
+    "organization": "Darukaa Earth Curated Knowledge Base",
+    "authors": null,
+    "publication_year": 2024,
+    "source_url": "https://www.ipbes.net/global-assessment",
+    "document_type": "curated_summary",
+    "topic": "biodiversity",
+    "region": null,
+    "tags": ["monoculture", "habitat diversity", "landscape simplification"],
+    "credibility_tier": "curated",
+    "text": "Landscape and crop simplification — large areas planted with a single crop species — is one of the most consistently identified drivers of on-farm biodiversity decline in global biodiversity assessments. Monoculture systems provide a structurally uniform habitat (single canopy height, single flowering period, uniform root architecture), which supports far fewer niches than mixed or intercropped systems. Introducing structural diversity, through intercropping, crop rotation, or field-margin vegetation, increases the range of microhabitats available and is associated with higher observed species richness across taxa including insects, birds, and soil organisms. The relationship is structural rather than purely chemical: even without any change in agrochemical use, increasing planting diversity tends to increase habitat diversity."
+  },
+  {
+    "title": "Pollinator Diversity and Floral Resource Availability — Curated Summary",
+    "organization": "Darukaa Earth Curated Knowledge Base",
+    "authors": null,
+    "publication_year": 2023,
+    "source_url": "https://www.ipbes.net/pollinators",
+    "document_type": "curated_summary",
+    "topic": "biodiversity",
+    "region": null,
+    "tags": ["pollinators", "floral resources", "pesticide pressure"],
+    "credibility_tier": "curated",
+    "text": "Pollinator abundance and diversity are strongly linked to the continuity of floral resources across the growing season and to pesticide exposure. Landscapes with native flowering strips, hedgerows, or diverse intercropped plantings provide forage across a longer window than a single mono-cropped flowering period, supporting a broader range of pollinator species. Conversely, high-intensity broad-spectrum pesticide application is one of the most consistently cited pressures on pollinator populations in global assessments. Reducing routine broad-spectrum application in favor of targeted, monitoring-based pest management is associated with recovery of pollinator abundance over subsequent seasons, though the pace and magnitude of recovery is site- and species-dependent and is not reducible to a single universal figure."
+  },
+  {
+    "title": "Habitat Fragmentation and Species Connectivity — Curated Summary",
+    "organization": "Darukaa Earth Curated Knowledge Base",
+    "authors": null,
+    "publication_year": 2024,
+    "source_url": "https://www.ipbes.net/global-assessment",
+    "document_type": "curated_summary",
+    "topic": "biodiversity",
+    "region": null,
+    "tags": ["fragmentation", "connectivity", "corridors"],
+    "credibility_tier": "curated",
+    "text": "Habitat fragmentation — the breaking of continuous habitat into smaller, isolated patches — reduces the effective population size of many species and limits gene flow and recolonization after local disturbance. Restoring or establishing vegetation corridors (hedgerows, riparian buffers, native vegetation strips connecting patches) is a widely recommended intervention for re-establishing landscape connectivity. Connectivity restoration is generally framed as a medium-to-long-term intervention: corridor vegetation itself may establish within one to two growing seasons, but measurable increases in species movement and colonization of previously isolated patches typically take several years to become apparent."
+  },
+  {
+    "title": "Species Richness as a Composite Biodiversity Indicator — Curated Summary",
+    "organization": "Darukaa Earth Curated Knowledge Base",
+    "authors": null,
+    "publication_year": 2023,
+    "source_url": "https://www.ipbes.net/global-assessment",
+    "document_type": "curated_summary",
+    "topic": "biodiversity",
+    "region": null,
+    "tags": ["species richness", "indicator", "agroforestry"],
+    "credibility_tier": "curated",
+    "text": "Species richness — the number of distinct species observed in an area — is a commonly used, though partial, biodiversity indicator. It responds to multiple underlying drivers simultaneously: habitat structural diversity, resource availability (including water and floral resources), and disturbance intensity (including fragmentation and agrochemical exposure). Agroforestry systems, which add a woody vegetation layer to otherwise open cropland, are consistently associated with higher observed species richness relative to open monoculture, because they add both structural complexity and additional microclimate niches (shade, humidity gradients) not present in single-layer cropping systems."
+  }
+]

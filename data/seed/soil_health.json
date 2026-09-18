@@ -1,0 +1,41 @@
+[
+  {
+    "title": "Soil Organic Carbon and Soil Function — Curated Summary",
+    "organization": "Darukaa Earth Curated Knowledge Base",
+    "authors": null,
+    "publication_year": 2024,
+    "source_url": "https://www.fao.org/soils-portal/en/",
+    "document_type": "curated_summary",
+    "topic": "soil",
+    "region": null,
+    "tags": ["soil organic carbon", "soil structure", "water retention"],
+    "credibility_tier": "curated",
+    "text": "Soil organic carbon (SOC) is widely used as a core indicator of soil health because it directly influences soil structure, water-holding capacity, and nutrient cycling. Soils with organic carbon content below roughly 1% are generally considered structurally degraded, with reduced aggregate stability and lower infiltration rates. Increasing organic carbon inputs, through practices such as cover cropping, residue retention, and reduced tillage, improves soil aggregate formation over multi-year timescales, which in turn increases the soil's capacity to retain moisture during dry periods. Because water retention and nutrient availability are foundational to plant growth, changes in soil organic carbon propagate into aboveground vegetation vigor and, indirectly, into the habitat quality available to soil fauna, pollinators, and other biodiversity. Quantitative improvement rates vary substantially by climate, soil type, and management intensity; general practice guidance from international soil health assessments avoids citing a single universal percentage improvement figure and instead frames organic carbon change as a multi-year, site-specific outcome of consistent organic input management."
+  },
+  {
+    "title": "Cover Cropping and Crop Residue Retention Practices — Curated Summary",
+    "organization": "Darukaa Earth Curated Knowledge Base",
+    "authors": null,
+    "publication_year": 2024,
+    "source_url": "https://www.fao.org/conservation-agriculture/en/",
+    "document_type": "curated_summary",
+    "topic": "soil",
+    "region": null,
+    "tags": ["cover crops", "conservation agriculture", "crop residue"],
+    "credibility_tier": "curated",
+    "text": "Conservation agriculture practices — minimal soil disturbance, permanent soil cover, and crop diversification — are commonly recommended by international agricultural organizations as a package for restoring degraded cropland. Legume-based cover crops (such as clover or vetch grown between main cropping cycles) fix atmospheric nitrogen and add organic matter to soil upon incorporation or as surface mulch, supporting soil microbial communities. Retaining crop residues rather than removing or burning them keeps organic matter cycling within the field and reduces erosion-driven nutrient loss. These practices are consistently associated with improved soil moisture retention in rainfed systems, which is particularly relevant in low-rainfall or semi-arid contexts where water availability is the primary constraint on both crop yield and surrounding vegetation health."
+  },
+  {
+    "title": "Soil pH and Nutrient Availability — Curated Summary",
+    "organization": "Darukaa Earth Curated Knowledge Base",
+    "authors": null,
+    "publication_year": 2023,
+    "source_url": "https://www.fao.org/soils-portal/en/",
+    "document_type": "curated_summary",
+    "topic": "soil",
+    "region": null,
+    "tags": ["soil pH", "nutrient availability"],
+    "credibility_tier": "curated",
+    "text": "Soil pH strongly governs the availability of key plant nutrients (nitrogen, phosphorus, potassium, and micronutrients). Most agricultural crops perform best in a moderately acidic to neutral pH range (roughly 6.0-7.5); outside this range, nutrient uptake efficiency declines even when nutrients are physically present in the soil. Strongly acidic or alkaline soils are also associated with reduced microbial diversity, which affects decomposition rates and nutrient cycling, indirectly influencing the broader food web that depends on soil biological activity."
+  }
+]

@@ -1,0 +1,54 @@
+[
+  {
+    "title": "Deforestation, Fragmentation and Downstream Biodiversity Impact — Curated Summary",
+    "organization": "Darukaa Earth Curated Knowledge Base",
+    "authors": null,
+    "publication_year": 2024,
+    "source_url": "https://earthobservatory.nasa.gov/topic/land",
+    "document_type": "curated_summary",
+    "topic": "human_impact",
+    "region": null,
+    "tags": ["deforestation", "fragmentation", "land cover change"],
+    "credibility_tier": "curated",
+    "text": "Land cover change monitoring consistently shows that deforestation rarely removes habitat uniformly; more commonly it produces a fragmented mosaic of remaining forest patches embedded in cleared land. This fragmentation compounds the direct habitat loss from clearing itself, because even the remaining forest patches experience 'edge effects' — altered microclimate and increased exposure to disturbance near patch boundaries — that reduce their effective habitat quality relative to intact forest interior. Reforestation buffers along the edges of cleared land, using native species, are a commonly recommended intervention both to reduce edge effects on remaining patches and to begin rebuilding connectivity over time."
+  },
+  {
+    "title": "Agrochemical Pollution and Non-Target Species — Curated Summary",
+    "organization": "Darukaa Earth Curated Knowledge Base",
+    "authors": null,
+    "publication_year": 2023,
+    "source_url": "https://www.unep.org/topics/chemicals-and-pollution-action",
+    "document_type": "curated_summary",
+    "topic": "human_impact",
+    "region": null,
+    "tags": ["pollution", "pesticide", "agrochemical"],
+    "credibility_tier": "curated",
+    "text": "Agrochemical runoff and drift affect non-target species beyond the intended pest organisms, including soil invertebrates, aquatic organisms in adjacent waterways, and pollinators. Environmental pollution assessments generally recommend integrated pest management (monitoring-based, targeted intervention rather than routine broad-spectrum application) as a primary strategy for reducing non-target exposure while still managing pest pressure. Reducing agrochemical input intensity is typically framed as a gradual transition rather than an immediate cessation, given legitimate pest-management needs during the transition period."
+  },
+  {
+    "title": "Urbanization Pressure on Adjacent Ecosystems — Curated Summary",
+    "organization": "Darukaa Earth Curated Knowledge Base",
+    "authors": null,
+    "publication_year": 2023,
+    "source_url": "https://earthobservatory.nasa.gov/topic/land",
+    "document_type": "curated_summary",
+    "topic": "human_impact",
+    "region": null,
+    "tags": ["urbanization", "land cover", "habitat loss"],
+    "credibility_tier": "curated",
+    "text": "Urban expansion converts natural and agricultural land cover to impervious surfaces, which both directly removes habitat and changes local hydrology (increased runoff, reduced groundwater infiltration) for adjacent remaining natural areas. Ecological restoration in urban-adjacent contexts commonly focuses on green infrastructure — vegetated buffers, urban wetlands, and green corridors — to partially offset both the habitat loss and the hydrological disruption caused by impervious surface expansion."
+  },
+  {
+    "title": "Land Use Change and Soil Moisture Dynamics — Curated Summary",
+    "organization": "Darukaa Earth Curated Knowledge Base",
+    "authors": null,
+    "publication_year": 2024,
+    "source_url": "https://www.fao.org/land-water/en/",
+    "document_type": "curated_summary",
+    "topic": "land_use",
+    "region": null,
+    "tags": ["land use", "soil moisture", "vegetation cover"],
+    "credibility_tier": "curated",
+    "text": "Land use type strongly influences soil moisture dynamics through its effect on vegetation cover and root structure. Continuously bare or sparsely vegetated cropland loses moisture more rapidly to evaporation than land with continuous cover (cover crops, perennial vegetation, or agroforestry), because vegetation cover shades the soil surface and root systems create channels that improve infiltration during rainfall events. This is one reason water retention and vegetation cover interventions are frequently recommended together rather than in isolation."
+  }
+]

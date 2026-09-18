@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: darukaa-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-darukaa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-darukaa}
+      POSTGRES_DB: ${POSTGRES_DB:-darukaa_earth}
+    ports:
+      - "5432:5432"
+    volumes:
+      - darukaa_pg_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-darukaa}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: darukaa-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-darukaa}:${POSTGRES_PASSWORD:-darukaa}@postgres:5432/${POSTGRES_DB:-darukaa_earth}
+      VECTOR_BACKEND: pgvector
+      FRONTEND_URL: http://localhost:5173
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./data:/app/data
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: darukaa-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:8000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  darukaa_pg_data:

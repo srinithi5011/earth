@@ -1,0 +1,28 @@
+[
+  {
+    "title": "Rainfall Variability and Water Availability in Semi-Arid Systems — Curated Summary",
+    "organization": "Darukaa Earth Curated Knowledge Base",
+    "authors": null,
+    "publication_year": 2024,
+    "source_url": "https://www.ipcc.ch/report/ar6/wg2/",
+    "document_type": "curated_summary",
+    "topic": "climate",
+    "region": "semi-arid",
+    "tags": ["rainfall", "water availability", "semi-arid"],
+    "credibility_tier": "curated",
+    "text": "In semi-arid agricultural systems, rainfall timing and total volume are the primary determinants of water availability for both crops and surrounding vegetation, since irrigation infrastructure is often limited. Climate assessments consistently note that semi-arid regions are especially sensitive to rainfall variability: a given absolute reduction in rainfall has a proportionally larger effect on plant water stress in already water-limited systems than the same reduction would in a humid system. Water retention practices — mulching, contour earthworks, and increasing soil organic matter (which itself increases soil water-holding capacity) — are recommended as complementary strategies to reduce vulnerability to rainfall variability, rather than relying on a single intervention."
+  },
+  {
+    "title": "Temperature, Evapotranspiration, and Vegetation Stress — Curated Summary",
+    "organization": "Darukaa Earth Curated Knowledge Base",
+    "authors": null,
+    "publication_year": 2023,
+    "source_url": "https://www.ipcc.ch/report/ar6/wg2/",
+    "document_type": "curated_summary",
+    "topic": "climate",
+    "region": null,
+    "tags": ["temperature", "evapotranspiration", "vegetation stress"],
+    "credibility_tier": "curated",
+    "text": "Higher ambient temperatures increase evapotranspiration rates, meaning plants and soil lose water to the atmosphere more quickly for a given amount of available moisture. In combination with low rainfall, elevated temperature compounds water stress on vegetation, which can reduce vegetative cover and, over time, the habitat and forage resources that cover provides to dependent fauna. This compounding relationship is one reason climate assessments emphasize evaluating temperature and rainfall together rather than as independent variables when assessing ecosystem vulnerability."
+  }
+]
