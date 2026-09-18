@@ -140,28 +140,101 @@ def _expand_query(state: Dict[str, Any], message: str) -> str:
 
 
 def _build_assessment(state: Dict[str, Any], triggered) -> Dict[str, Any]:
-    def _status_for(condition_states: List[str]) -> str:
-        if any(s == "high" for s in condition_states):
-            return "High"
-        if any(s == "low" for s in condition_states):
-            return "Low"
-        return "Moderate"
+    """
+    Build environmental assessment with metric-specific semantics.
 
-    soil_states = [t.state for t in triggered if t.metric.startswith("soil")]
-    water_states = [t.state for t in triggered if t.metric == "rainfall"]
-    biodiversity_states = [t.state for t in triggered if t.metric.startswith("biodiversity")]
-    climate_states = [t.state for t in triggered if t.metric in ("rainfall", "temperature")]
-    human_states = [t.state for t in triggered if t.metric.startswith("human_impact")]
+    Important:
+    - Low soil condition -> Low soil health
+    - Low rainfall -> Low water availability
+    - Low rainfall / high temperature -> High climate stress
+    - Low biodiversity indicators -> Low biodiversity
+    - High human-impact indicators -> High human impact
+    """
+
+    soil_states = [
+        t.state for t in triggered
+        if t.metric.startswith("soil")
+    ]
+
+    rainfall_states = [
+        t.state for t in triggered
+        if t.metric == "rainfall"
+    ]
+
+    biodiversity_states = [
+        t.state for t in triggered
+        if t.metric.startswith("biodiversity")
+    ]
+
+    temperature_states = [
+        t.state for t in triggered
+        if t.metric == "temperature"
+    ]
+
+    human_states = [
+        t.state for t in triggered
+        if t.metric.startswith("human_impact")
+    ]
+
+    # Soil health: low condition means low health.
+    if "low" in soil_states:
+        soil_health = "Low"
+    elif "high" in soil_states:
+        soil_health = "High"
+    elif soil_states:
+        soil_health = "Moderate"
+    else:
+        soil_health = "Unknown"
+
+    # Water availability: low rainfall means low water availability.
+    if "low" in rainfall_states:
+        water_availability = "Low"
+    elif "high" in rainfall_states:
+        water_availability = "High"
+    elif rainfall_states:
+        water_availability = "Moderate"
+    else:
+        water_availability = "Unknown"
+
+    # Climate stress has inverse semantics:
+    # low rainfall or high temperature increases climate stress.
+    if "low" in rainfall_states or "high" in temperature_states:
+        climate_stress = "High"
+    elif "high" in rainfall_states:
+        climate_stress = "Low"
+    elif rainfall_states or temperature_states:
+        climate_stress = "Moderate"
+    else:
+        climate_stress = "Unknown"
+
+    # Biodiversity assessment should only use actual biodiversity indicators.
+    if "low" in biodiversity_states:
+        biodiversity = "Low"
+    elif "high" in biodiversity_states:
+        biodiversity = "High"
+    elif biodiversity_states:
+        biodiversity = "Moderate"
+    else:
+        biodiversity = "Unknown"
+
+    # Human impact: high reported pressure means high human impact.
+    if "high" in human_states:
+        human_impact = "High"
+    elif "low" in human_states:
+        human_impact = "Low"
+    elif human_states:
+        human_impact = "Moderate"
+    else:
+        human_impact = "Unknown"
 
     return {
-        "soil_health": _status_for(soil_states) if soil_states else "Unknown",
-        "water_availability": _status_for(water_states) if water_states else "Unknown",
-        "biodiversity": _status_for(biodiversity_states) if biodiversity_states else "Unknown",
-        "climate_stress": _status_for(climate_states) if climate_states else "Unknown",
-        "human_impact": _status_for(human_states) if human_states else "Unknown",
+        "soil_health": soil_health,
+        "water_availability": water_availability,
+        "biodiversity": biodiversity,
+        "climate_stress": climate_stress,
+        "human_impact": human_impact,
         "raw_state": state,
     }
-
 
 def _build_response_text(
     needs_more_info: bool,

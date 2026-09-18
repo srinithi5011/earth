@@ -1,7 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useConversationId, useSessionId } from "../hooks/useSession";
 import { sendChatMessage } from "../services/api";
-import type { ChatMessage, ChatResponse, Recommendation } from "../types";
+import type {
+  ChatMessage,
+  ChatResponse,
+  Recommendation,
+} from "../types";
 
 const INITIAL_ASSISTANT_MSG: ChatMessage = {
   role: "assistant",
@@ -11,28 +15,233 @@ const INITIAL_ASSISTANT_MSG: ChatMessage = {
     "rainfall, crop, and region — and I'll ask for whatever's missing before assessing it.",
 };
 
+function formatMetric(metric: string) {
+  return metric
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 function RecommendationCard({ rec }: { rec: Recommendation }) {
+  // Remove duplicate metrics while also treating
+  // "habitat_diversity" and "habitat diversity" as the same metric.
+  const uniqueMetrics = Array.from(
+    new Map(
+      (rec.affected_metrics || []).map((metric) => {
+        const normalized = metric
+          .replace(/_/g, " ")
+          .trim()
+          .toLowerCase();
+
+        return [normalized, normalized];
+      })
+    ).values()
+  );
+
   return (
-    <div className="bg-emerald-50/80 border border-emerald-200/80 p-3.5 rounded-xl text-xs shadow-2xs hover:border-emerald-300 transition-colors">
-      <div className="flex items-center justify-between font-bold text-emerald-950">
-        <span className="text-xs">{rec.recommendation}</span>
-        <span className="text-[10px] bg-emerald-100 text-emerald-900 px-2.5 py-0.5 rounded-full font-bold border border-emerald-300/60 shrink-0">
-          {rec.confidence_label} ({Math.round(rec.confidence * 100)}%)
-        </span>
+    <div className="bg-emerald-50/80 border border-emerald-200/80 p-4 rounded-xl text-xs shadow-2xs hover:border-emerald-300 transition-colors">
+
+      {/* Recommendation */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-start gap-3">
+          <span className="flex-1 text-sm leading-relaxed font-bold text-emerald-950">
+            {rec.recommendation}
+          </span>
+
+          <span className="text-[10px] bg-emerald-100 text-emerald-900 px-2.5 py-1 rounded-full font-bold border border-emerald-300/60 shrink-0">
+            {rec.confidence_label} (
+            {Math.round(rec.confidence * 100)}
+            %)
+          </span>
+        </div>
       </div>
-      <p className="text-slate-700 mt-1.5 leading-relaxed text-xs">
-        {rec.scientific_reasoning}
-      </p>
-      {rec.affected_metrics && rec.affected_metrics.length > 0 && (
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
-          {rec.affected_metrics.map((m, idx) => (
-            <span
-              key={idx}
-              className="bg-white border border-emerald-200/80 text-emerald-900 text-[10px] px-2 py-0.5 rounded-md font-medium shadow-2xs"
-            >
-              {m}
+
+      {/* Scientific reasoning */}
+      {rec.scientific_reasoning && (
+        <div className="mt-3 bg-white/70 border border-emerald-100 rounded-lg p-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 mb-1.5">
+            Why This Helps
+          </p>
+
+          <p className="text-slate-700 leading-relaxed text-xs">
+            {rec.scientific_reasoning}
+          </p>
+        </div>
+      )}
+
+      {/* Affected environmental metrics */}
+      {uniqueMetrics.length > 0 && (
+        <div className="mt-3">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 mb-1.5">
+            Impacted Environmental Metrics
+          </p>
+
+          <div className="flex flex-wrap gap-1.5">
+            {uniqueMetrics.map((metric) => (
+              <span
+                key={metric}
+                className="inline-flex items-center bg-white border border-emerald-200 text-emerald-900 text-[10px] px-2.5 py-1 rounded-md font-medium shadow-2xs"
+              >
+                {formatMetric(metric)}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Expected time horizon */}
+      {rec.time_horizon &&
+        Object.keys(rec.time_horizon).length > 0 && (
+          <div className="mt-3">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 mb-1.5">
+              Expected Time Horizon
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {rec.time_horizon.short_term && (
+                <div className="bg-white border border-emerald-200 rounded-lg p-2.5">
+                  <p className="text-[9px] font-bold uppercase text-slate-500">
+                    Short Term
+                  </p>
+
+                  <p className="text-[10px] text-slate-700 mt-1 leading-relaxed">
+                    {rec.time_horizon.short_term}
+                  </p>
+                </div>
+              )}
+
+              {rec.time_horizon.medium_term && (
+                <div className="bg-white border border-emerald-200 rounded-lg p-2.5">
+                  <p className="text-[9px] font-bold uppercase text-slate-500">
+                    Medium Term
+                  </p>
+
+                  <p className="text-[10px] text-slate-700 mt-1 leading-relaxed">
+                    {rec.time_horizon.medium_term}
+                  </p>
+                </div>
+              )}
+
+              {rec.time_horizon.long_term && (
+                <div className="bg-white border border-emerald-200 rounded-lg p-2.5">
+                  <p className="text-[9px] font-bold uppercase text-slate-500">
+                    Long Term
+                  </p>
+
+                  <p className="text-[10px] text-slate-700 mt-1 leading-relaxed">
+                    {rec.time_horizon.long_term}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+      {/* Expected environmental effects */}
+      {rec.expected_effect &&
+        Object.keys(rec.expected_effect).length > 0 && (
+          <div className="mt-3">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 mb-1.5">
+              Expected Environmental Effects
+            </p>
+
+            <div className="space-y-1.5">
+              {Object.entries(rec.expected_effect).map(
+                ([metric, effect]) => (
+                  <div
+                    key={metric}
+                    className="flex items-start gap-2 bg-white border border-emerald-200 rounded-lg px-3 py-2"
+                  >
+                    <span className="font-semibold text-emerald-900 shrink-0">
+                      {formatMetric(metric)}:
+                    </span>
+
+                    <span className="text-slate-700">
+                      {effect}
+                    </span>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        )}
+
+      {/* Scientific evidence */}
+      {rec.evidence && rec.evidence.length > 0 && (
+        <div className="mt-4 border-t border-emerald-200 pt-3">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-800">
+              Scientific Evidence
+            </p>
+
+            <span className="text-[9px] text-slate-500">
+              {rec.evidence.length} source
+              {rec.evidence.length !== 1 ? "s" : ""} retrieved
             </span>
-          ))}
+          </div>
+
+          <div className="space-y-2">
+            {rec.evidence.map((evidence, idx) => (
+              <div
+                key={evidence.chunk_id || idx}
+                className="bg-white border border-emerald-200 rounded-lg p-3"
+              >
+                {/* Source title + link */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-bold text-slate-800 leading-relaxed">
+                      {evidence.title || "Scientific source"}
+                    </p>
+
+                    <p className="text-[10px] text-slate-500 mt-1">
+                      {evidence.organization ||
+                        "Unknown organization"}
+
+                      {evidence.publication_year
+                        ? ` • ${evidence.publication_year}`
+                        : ""}
+
+                      {evidence.document_type
+                        ? ` • ${evidence.document_type}`
+                        : ""}
+                    </p>
+                  </div>
+
+                  {evidence.source_url && (
+                    <a
+                      href={evidence.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[10px] font-bold text-emerald-700 hover:text-emerald-900 underline whitespace-nowrap shrink-0"
+                    >
+                      View Source ↗
+                    </a>
+                  )}
+                </div>
+
+                {/* Evidence snippet */}
+                {evidence.text_snippet && (
+                  <div className="mt-2 bg-slate-50 border border-slate-100 rounded-md px-2.5 py-2">
+                    <p className="text-[10px] text-slate-600 leading-relaxed">
+                      {evidence.text_snippet}
+                    </p>
+                  </div>
+                )}
+
+                {/* Relevance */}
+                {typeof evidence.relevance === "number" && (
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-[9px] uppercase tracking-wide font-semibold text-slate-400">
+                      Retrieval relevance
+                    </span>
+
+                    <span className="text-[9px] font-bold text-emerald-700">
+                      {(evidence.relevance * 100).toFixed(1)}%
+                    </span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -46,8 +255,13 @@ export default function Scientist() {
   // Load initial chat history from sessionStorage or fallback to default message
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     try {
-      const saved = window.sessionStorage.getItem("darukaa_chat_history");
-      return saved ? JSON.parse(saved) : [INITIAL_ASSISTANT_MSG];
+      const saved = window.sessionStorage.getItem(
+        "darukaa_chat_history"
+      );
+
+      return saved
+        ? JSON.parse(saved)
+        : [INITIAL_ASSISTANT_MSG];
     } catch {
       return [INITIAL_ASSISTANT_MSG];
     }
@@ -63,15 +277,24 @@ export default function Scientist() {
   const [region, setRegion] = useState<string>("");
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  const activeMetricsCount = [soilCarbon, rainfall, region].filter(Boolean).length;
+
+  const activeMetricsCount = [
+    soilCarbon,
+    rainfall,
+    region,
+  ].filter(Boolean).length;
 
   // Sync messages to sessionStorage whenever they update
   useEffect(() => {
     try {
-      window.sessionStorage.setItem("darukaa_chat_history", JSON.stringify(messages));
+      window.sessionStorage.setItem(
+        "darukaa_chat_history",
+        JSON.stringify(messages)
+      );
     } catch {
       // Ignore storage write issues
     }
+
     scrollRef.current?.scrollTo({
       top: scrollRef.current.scrollHeight,
       behavior: "smooth",
@@ -80,33 +303,73 @@ export default function Scientist() {
 
   async function handleSend() {
     const text = input.trim();
-    if ((!text && !soilCarbon && !rainfall && !region) || loading) return;
+
+    if (
+      (!text && !soilCarbon && !rainfall && !region) ||
+      loading
+    ) {
+      return;
+    }
 
     setInput("");
     setError(null);
 
     const structured_input: Record<string, any> = {};
-    if (soilCarbon) structured_input.soil = { organic_carbon: parseFloat(soilCarbon) };
-    if (rainfall) structured_input.climate = { rainfall };
-    if (region) structured_input.location = { region };
 
-    const userDisplayMsg = text || "Updated structured environmental state parameters.";
-    setMessages((prev) => [...prev, { role: "user", content: userDisplayMsg }]);
+    if (soilCarbon) {
+      structured_input.soil = {
+        organic_carbon: parseFloat(soilCarbon),
+      };
+    }
+
+    if (rainfall) {
+      structured_input.climate = {
+        rainfall,
+      };
+    }
+
+    if (region) {
+      structured_input.location = {
+        region,
+      };
+    }
+
+    const userDisplayMsg =
+      text ||
+      "Updated structured environmental state parameters.";
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        role: "user",
+        content: userDisplayMsg,
+      },
+    ]);
+
     setLoading(true);
 
     try {
       const res: ChatResponse = await sendChatMessage({
         session_id: sessionId,
         conversation_id: conversationId || undefined,
-        message: text || "Evaluating provided structured environmental metrics.",
+        message:
+          text ||
+          "Evaluating provided structured environmental metrics.",
         structured_input:
-          Object.keys(structured_input).length > 0 ? structured_input : undefined,
+          Object.keys(structured_input).length > 0
+            ? structured_input
+            : undefined,
       });
 
       setConversationId(res.conversation_id);
+
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: res.response, response: res },
+        {
+          role: "assistant",
+          content: res.response,
+          response: res,
+        },
       ]);
 
       if (!res.needs_more_information) {
@@ -121,13 +384,18 @@ export default function Scientist() {
       setRegion("");
       setShowMetrics(false);
     } catch (e: any) {
-      setError(e.message || "Something went wrong contacting the reasoning API.");
+      setError(
+        e.message ||
+          "Something went wrong contacting the reasoning API."
+      );
     } finally {
       setLoading(false);
     }
   }
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+  function handleKeyDown(
+    e: React.KeyboardEvent<HTMLTextAreaElement>
+  ) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
@@ -136,12 +404,15 @@ export default function Scientist() {
 
   return (
     <div className="flex flex-col h-screen bg-slate-50/60 font-sans">
+
+      {/* Header */}
       <div className="px-8 py-4 border-b border-emerald-100/80 bg-white/80 backdrop-blur-md sticky top-0 z-20 flex items-center justify-between shadow-2xs">
         <div>
           <h1 className="text-lg font-bold text-slate-900 flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse" />
             AI Environmental Scientist
           </h1>
+
           <p className="text-xs text-slate-500 mt-0.5">
             Realtime persistent chat memory powered by evidence-grounded reasoning.
           </p>
@@ -155,7 +426,12 @@ export default function Scientist() {
               : "bg-white text-emerald-900 border border-emerald-200 hover:bg-emerald-50"
           }`}
         >
-          <span>{showMetrics ? "Hide Numeric Drawer" : "+ Add Specific Metrics"}</span>
+          <span>
+            {showMetrics
+              ? "Hide Numeric Drawer"
+              : "+ Add Specific Metrics"}
+          </span>
+
           {activeMetricsCount > 0 && (
             <span className="w-4 h-4 rounded-full bg-emerald-200 text-emerald-950 text-[10px] font-black flex items-center justify-center">
               {activeMetricsCount}
@@ -164,6 +440,7 @@ export default function Scientist() {
         </button>
       </div>
 
+      {/* Chat */}
       <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto px-6 md:px-12 py-8 flex flex-col gap-5 max-w-4xl w-full mx-auto"
@@ -171,7 +448,11 @@ export default function Scientist() {
         {messages.map((m, i) => (
           <div
             key={i}
-            className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex ${
+              m.role === "user"
+                ? "justify-end"
+                : "justify-start"
+            }`}
           >
             <div
               className={`max-w-2xl rounded-2xl px-5 py-4 text-sm leading-relaxed shadow-xs ${
@@ -180,62 +461,105 @@ export default function Scientist() {
                   : "bg-white text-slate-900 border border-emerald-100/80 rounded-bl-xs"
               }`}
             >
-              <div className="whitespace-pre-wrap font-sans text-sm">{m.content}</div>
+              <div className="whitespace-pre-wrap font-sans text-sm">
+                {m.content}
+              </div>
 
-              {m.response && !m.response.needs_more_information && (
-                <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col gap-4">
-                  {m.response.drivers.length > 0 && (
-                    <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
-                      <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> Key Stress Drivers
-                      </h4>
-                      <ul className="list-disc list-inside text-xs text-slate-700 space-y-0.5">
-                        {m.response.drivers.map((d, idx) => (
-                          <li key={idx}>{d}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+              {/* Response details */}
+              {m.response &&
+                !m.response.needs_more_information && (
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex flex-col gap-4">
 
-                  {m.response.relationships.length > 0 && (
-                    <div>
-                      <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" /> Causal Relationship Graph
-                      </h4>
-                      <div className="flex flex-col gap-1.5">
-                        {m.response.relationships.slice(0, 6).map((r, idx) => (
-                          <div
-                            key={idx}
-                            className="text-xs text-slate-800 font-mono bg-emerald-50/60 p-2 rounded-lg border border-emerald-100 flex items-center justify-between"
-                          >
-                            <span>
-                              <strong>{r.source_metric}</strong> → <span className="font-bold text-emerald-800">{r.relationship}</span> → <strong>{r.target_metric}</strong>
-                            </span>
-                            <span className="text-[10px] font-bold uppercase bg-white text-slate-600 px-1.5 py-0.5 rounded border border-emerald-100">
-                              {r.strength}
-                            </span>
-                          </div>
-                        ))}
+                    {/* Stress drivers */}
+                    {m.response.drivers.length > 0 && (
+                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-200/60">
+                        <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                          Key Stress Drivers
+                        </h4>
+
+                        <ul className="list-disc list-inside text-xs text-slate-700 space-y-0.5">
+                          {m.response.drivers.map(
+                            (d, idx) => (
+                              <li key={idx}>{d}</li>
+                            )
+                          )}
+                        </ul>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  {m.response.recommendations.length > 0 && (
-                    <div className="flex flex-col gap-2">
-                      <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-sky-500" /> Actionable Interventions
-                      </h4>
-                      {m.response.recommendations.map((r, idx) => (
-                        <RecommendationCard key={idx} rec={r} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+                    {/* Causal relationship graph */}
+                    {m.response.relationships.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                          Causal Relationship Graph
+                        </h4>
+
+                        <div className="flex flex-col gap-1.5">
+                          {m.response.relationships
+                            .slice(0, 6)
+                            .map((r, idx) => (
+                              <div
+                                key={idx}
+                                className="text-xs text-slate-800 bg-emerald-50/60 p-2 rounded-lg border border-emerald-100 flex items-center justify-between gap-3"
+                              >
+                                <span className="flex flex-wrap items-center gap-1">
+                                  <strong>
+                                    {formatMetric(
+                                      r.source_metric
+                                    )}
+                                  </strong>
+
+                                  <span>→</span>
+
+                                  <span className="font-bold text-emerald-800">
+                                    {r.relationship}
+                                  </span>
+
+                                  <span>→</span>
+
+                                  <strong>
+                                    {formatMetric(
+                                      r.target_metric
+                                    )}
+                                  </strong>
+                                </span>
+
+                                <span className="text-[10px] font-bold uppercase bg-white text-slate-600 px-1.5 py-0.5 rounded border border-emerald-100 shrink-0">
+                                  {r.strength}
+                                </span>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Recommendations */}
+                    {m.response.recommendations.length > 0 && (
+                      <div className="flex flex-col gap-2">
+                        <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+                          Actionable Interventions
+                        </h4>
+
+                        {m.response.recommendations.map(
+                          (r, idx) => (
+                            <RecommendationCard
+                              key={idx}
+                              rec={r}
+                            />
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
             </div>
           </div>
         ))}
 
+        {/* Loading */}
         {loading && (
           <div className="flex justify-start">
             <div className="bg-white border border-emerald-200/80 rounded-2xl px-4 py-3 text-xs text-slate-600 animate-pulse flex items-center gap-2 shadow-2xs">
@@ -245,6 +569,7 @@ export default function Scientist() {
           </div>
         )}
 
+        {/* Error */}
         {error && (
           <div className="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-xl px-4 py-3">
             {error}
@@ -252,49 +577,74 @@ export default function Scientist() {
         )}
       </div>
 
+      {/* Structured metrics drawer */}
       {showMetrics && (
         <div className="max-w-4xl mx-auto w-full px-8 pb-2">
           <div className="bg-white border border-emerald-200/80 rounded-2xl p-4 shadow-lg">
             <h3 className="text-xs font-bold text-emerald-900 uppercase tracking-wider mb-2.5">
               Structured Metric Inputs
             </h3>
+
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+
+              {/* Soil carbon */}
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1">
                   Soil Carbon (%)
                 </label>
+
                 <input
                   type="number"
                   step="0.1"
                   value={soilCarbon}
-                  onChange={(e) => setSoilCarbon(e.target.value)}
+                  onChange={(e) =>
+                    setSoilCarbon(e.target.value)
+                  }
                   placeholder="e.g. 0.8"
                   className="w-full text-xs bg-transparent text-slate-900 font-semibold focus:outline-none"
                 />
               </div>
+
+              {/* Rainfall */}
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1">
                   Rainfall Level
                 </label>
+
                 <select
                   value={rainfall}
-                  onChange={(e) => setRainfall(e.target.value)}
+                  onChange={(e) =>
+                    setRainfall(e.target.value)
+                  }
                   className="w-full text-xs bg-transparent text-slate-900 font-semibold focus:outline-none cursor-pointer"
                 >
-                  <option value="">Select rainfall</option>
-                  <option value="low">Low / Arid</option>
-                  <option value="moderate">Moderate</option>
-                  <option value="high">High / Heavy</option>
+                  <option value="">
+                    Select rainfall
+                  </option>
+                  <option value="low">
+                    Low / Arid
+                  </option>
+                  <option value="moderate">
+                    Moderate
+                  </option>
+                  <option value="high">
+                    High / Heavy
+                  </option>
                 </select>
               </div>
+
+              {/* Region */}
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
                 <label className="block text-[11px] font-semibold text-slate-700 mb-1">
                   Region / Zone
                 </label>
+
                 <input
                   type="text"
                   value={region}
-                  onChange={(e) => setRegion(e.target.value)}
+                  onChange={(e) =>
+                    setRegion(e.target.value)
+                  }
                   placeholder="e.g. semi-arid"
                   className="w-full text-xs bg-transparent text-slate-900 font-semibold focus:outline-none"
                 />
@@ -304,19 +654,29 @@ export default function Scientist() {
         </div>
       )}
 
+      {/* Input */}
       <div className="border-t border-emerald-100/80 bg-white/80 backdrop-blur-md px-8 py-4">
         <div className="max-w-4xl mx-auto flex gap-3 items-center">
           <textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) =>
+              setInput(e.target.value)
+            }
             onKeyDown={handleKeyDown}
             rows={2}
             placeholder="Describe your land state, crop problems, or answer the assistant's questions…"
             className="flex-1 resize-none rounded-xl border border-emerald-200/80 bg-slate-50/50 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 focus:bg-white text-slate-900 placeholder:text-slate-400"
           />
+
           <button
             onClick={handleSend}
-            disabled={loading || (!input.trim() && !soilCarbon && !rainfall && !region)}
+            disabled={
+              loading ||
+              (!input.trim() &&
+                !soilCarbon &&
+                !rainfall &&
+                !region)
+            }
             className="px-6 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold transition-all shadow-2xs disabled:opacity-40 shrink-0 cursor-pointer"
           >
             Send

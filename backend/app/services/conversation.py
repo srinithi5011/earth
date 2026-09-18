@@ -50,7 +50,7 @@ _CROP_RE = re.compile(r"\bgrow(?:ing)?\s+([a-zA-Z\- ]{3,20}?)(?:\.|,| in| on| co
 _REGION_RE = re.compile(
     r"\b(semi-arid|arid|tropical|temperate|mediterranean|subtropical|savanna|alpine|coastal)\b", re.I
 )
-_MONOCULTURE_CROP_RE = re.compile(r"monoculture\s+([a-zA-Z]+)", re.I)
+_MONOCULTURE_CROP_RE = re.compile(r"(?:\bgrow(?:ing)?\s+)?([a-zA-Z\-]+)\s+(?:as\s+a\s+)?monoculture\b", re.I)
 
 
 def extract_from_text(text: str) -> Dict[str, Any]:
