@@ -1,4 +1,5 @@
 # Darukaa Earth — AI Biodiversity Intelligence
+🌐 Live Demo: https://earth-1-g0v1.onrender.com/
 
 An evidence-grounded environmental intelligence system, built for the Darukaa.Earth
 hackathon challenge. It behaves like an AI environmental scientist: it retrieves
