@@ -1,0 +1,140 @@
+[
+  {
+    "scenario": "1. Low soil carbon + low rainfall + monoculture",
+    "needs_more_information": false,
+    "num_drivers": 3,
+    "num_recommendations": 4,
+    "retrieval_relevance": 0.258,
+    "evidence_coverage": 1.0,
+    "multi_metric_reasoning": true,
+    "recommendation_specificity": 0.75,
+    "citation_presence": 1.0,
+    "missing_info_detection_correct": true
+  },
+  {
+    "scenario": "2. High rainfall + deforestation + fragmentation",
+    "needs_more_information": false,
+    "num_drivers": 3,
+    "num_recommendations": 4,
+    "retrieval_relevance": 0.227,
+    "evidence_coverage": 1.0,
+    "multi_metric_reasoning": true,
+    "recommendation_specificity": 0.0,
+    "citation_presence": 1.0,
+    "missing_info_detection_correct": true
+  },
+  {
+    "scenario": "3. High temperature + low water + low vegetation diversity",
+    "needs_more_information": false,
+    "num_drivers": 2,
+    "num_recommendations": 3,
+    "retrieval_relevance": 0.243,
+    "evidence_coverage": 1.0,
+    "multi_metric_reasoning": false,
+    "recommendation_specificity": 0.0,
+    "citation_presence": 1.0,
+    "missing_info_detection_correct": true
+  },
+  {
+    "scenario": "4. Pollution + low biodiversity + urban expansion",
+    "needs_more_information": false,
+    "num_drivers": 3,
+    "num_recommendations": 2,
+    "retrieval_relevance": 0.236,
+    "evidence_coverage": 1.0,
+    "multi_metric_reasoning": true,
+    "recommendation_specificity": 0.0,
+    "citation_presence": 1.0,
+    "missing_info_detection_correct": true
+  },
+  {
+    "scenario": "5. Healthy soil + high biodiversity",
+    "needs_more_information": false,
+    "num_drivers": 1,
+    "num_recommendations": 0,
+    "retrieval_relevance": 0.265,
+    "evidence_coverage": 0.0,
+    "multi_metric_reasoning": false,
+    "recommendation_specificity": 0.0,
+    "citation_presence": 0.0,
+    "missing_info_detection_correct": true
+  },
+  {
+    "scenario": "6. Agricultural monoculture + pollinator decline",
+    "needs_more_information": false,
+    "num_drivers": 1,
+    "num_recommendations": 4,
+    "retrieval_relevance": 0.249,
+    "evidence_coverage": 1.0,
+    "multi_metric_reasoning": false,
+    "recommendation_specificity": 0.5,
+    "citation_presence": 1.0,
+    "missing_info_detection_correct": true
+  },
+  {
+    "scenario": "7. Forest fragmentation",
+    "needs_more_information": false,
+    "num_drivers": 2,
+    "num_recommendations": 4,
+    "retrieval_relevance": 0.242,
+    "evidence_coverage": 1.0,
+    "multi_metric_reasoning": false,
+    "recommendation_specificity": 0.0,
+    "citation_presence": 1.0,
+    "missing_info_detection_correct": true
+  },
+  {
+    "scenario": "8. Wetland degradation",
+    "needs_more_information": false,
+    "num_drivers": 2,
+    "num_recommendations": 2,
+    "retrieval_relevance": 0.242,
+    "evidence_coverage": 1.0,
+    "multi_metric_reasoning": false,
+    "recommendation_specificity": 0.0,
+    "citation_presence": 1.0,
+    "missing_info_detection_correct": true
+  },
+  {
+    "scenario": "9. Semi-arid agricultural land",
+    "needs_more_information": false,
+    "num_drivers": 3,
+    "num_recommendations": 4,
+    "retrieval_relevance": 0.256,
+    "evidence_coverage": 1.0,
+    "multi_metric_reasoning": true,
+    "recommendation_specificity": 0.75,
+    "citation_presence": 1.0,
+    "missing_info_detection_correct": true
+  },
+  {
+    "scenario": "10. Urban ecological restoration",
+    "needs_more_information": false,
+    "num_drivers": 2,
+    "num_recommendations": 0,
+    "retrieval_relevance": 0.243,
+    "evidence_coverage": 0.0,
+    "multi_metric_reasoning": false,
+    "recommendation_specificity": 0.0,
+    "citation_presence": 0.0,
+    "missing_info_detection_correct": true
+  },
+  {
+    "scenario": "11. Vague underspecified message (missing-info detection)",
+    "needs_more_information": true,
+    "num_drivers": 0,
+    "num_recommendations": 0,
+    "retrieval_relevance": 0.251,
+    "evidence_coverage": 0.0,
+    "multi_metric_reasoning": false,
+    "recommendation_specificity": 0.0,
+    "citation_presence": 0.0,
+    "missing_info_detection_correct": true
+  }
+]
+
+--- Aggregate ---
+Scenarios run: 11 (11 succeeded)
+Avg retrieval relevance: 0.247
+Multi-metric reasoning rate: 36.36%
+Missing-info detection accuracy: 100.00%

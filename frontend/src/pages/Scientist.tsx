@@ -21,6 +21,74 @@ function formatMetric(metric: string) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+
+function UncertaintySection({ assessment }: { assessment: any }) {
+  const uncertainty = assessment?.uncertainty;
+
+  if (!uncertainty || Object.keys(uncertainty).length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="bg-amber-50 p-3 rounded-xl border border-amber-200/70">
+      <h4 className="text-xs font-bold text-amber-900 uppercase tracking-wider mb-2">
+        Data Uncertainty
+      </h4>
+
+      <div className="space-y-2">
+        {Object.entries(uncertainty).map(
+          ([metric, details]: [string, any]) => (
+            <div
+              key={metric}
+              className="bg-white/70 border border-amber-100 rounded-lg p-2.5"
+            >
+              <p className="text-[11px] font-bold text-slate-800">
+                {formatMetric(metric)}
+              </p>
+
+              {details.reason && (
+                <p className="text-[10px] text-slate-600 mt-1 leading-relaxed">
+                  {details.reason}
+                </p>
+              )}
+
+              {details.risk_indicators?.length > 0 && (
+                <p className="text-[10px] text-slate-600 mt-1 leading-relaxed">
+                  <span className="font-semibold">Observed indicators: </span>
+                  {details.risk_indicators.join(" ")}
+                </p>
+              )}
+
+              {details.detected_pressures?.length > 0 && (
+                <p className="text-[10px] text-slate-600 mt-1 leading-relaxed">
+                  <span className="font-semibold">Detected pressures: </span>
+                  {details.detected_pressures.join(", ")}
+                </p>
+              )}
+
+              {details.data_needed?.length > 0 && (
+                <p className="text-[10px] text-slate-600 mt-1 leading-relaxed">
+                  <span className="font-semibold">Useful data: </span>
+                  {details.data_needed.join(", ")}
+                </p>
+              )}
+            </div>
+          )
+        )}
+      </div>
+    </div>
+  );
+}
+
+function cleanResponseText(content: string) {
+  return content
+    .replace(/\bBiodiversity:\s*Unknown\b/gi, "Biodiversity: Insufficient Data")
+    .replace(/\bHuman Impact:\s*Unknown\b/gi, "Human Impact: Insufficient Data")
+    .replace(/^\s*-?\s*Uncertainty:\s*\{.*\}\s*$/gm, "")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function RecommendationCard({ rec }: { rec: Recommendation }) {
   // Remove duplicate metrics while also treating
   // "habitat_diversity" and "habitat diversity" as the same metric.
@@ -462,7 +530,7 @@ export default function Scientist() {
               }`}
             >
               <div className="whitespace-pre-wrap font-sans text-sm">
-                {m.content}
+                {cleanResponseText(m.content)}
               </div>
 
               {/* Response details */}
@@ -485,6 +553,46 @@ export default function Scientist() {
                             )
                           )}
                         </ul>
+                      </div>
+                    )}
+
+                    {/* Environmental assessment */}
+                    {m.response.environmental_assessment && (
+                      <div className="bg-white p-3 rounded-xl border border-emerald-100">
+                        <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                          Environmental Assessment
+                        </h4>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                          {[
+                            ["soil_health", "Soil Health"],
+                            ["water_availability", "Water Availability"],
+                            ["biodiversity", "Biodiversity"],
+                            ["climate_stress", "Climate Stress"],
+                            ["human_impact", "Human Impact"],
+                          ].map(([key, label]) => (
+                            <div
+                              key={key}
+                              className="bg-slate-50 border border-slate-200 rounded-lg p-2"
+                            >
+                              <p className="text-[9px] font-bold uppercase text-slate-500">
+                                {label}
+                              </p>
+                              <p className="text-xs font-bold text-slate-800 mt-1">
+                               {["biodiversity", "human_impact"].includes(key)
+                                    ? "Insufficient Data"
+                                    : m.response!.environmental_assessment[key] ?? "Unknown"}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="mt-2">
+                          <UncertaintySection
+                            assessment={m.response.environmental_assessment}
+                          />
+                        </div>
                       </div>
                     )}
 

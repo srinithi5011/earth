@@ -124,7 +124,14 @@ class ReasoningChain:
     downstream_metrics: Set[str]
 
     def is_multi_metric(self, min_metrics: int = 3) -> bool:
-        return len(self.triggered_metrics) + len(self.downstream_metrics) >= min_metrics
+        connected_metrics = set(self.triggered_metrics) | set(self.downstream_metrics)
+
+        # Count distinct environmental metrics represented in the reasoning chain.
+        for edge in self.edges:
+            connected_metrics.add(edge["source_metric"])
+            connected_metrics.add(edge["target_metric"])
+
+        return len(connected_metrics) >= min_metrics
 
 
 def build_reasoning_chain(

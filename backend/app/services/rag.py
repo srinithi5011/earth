@@ -227,12 +227,60 @@ def _build_assessment(state: Dict[str, Any], triggered) -> Dict[str, Any]:
     else:
         human_impact = "Unknown"
 
+        # Explain uncertainty instead of guessing missing measurements.
+    uncertainty = {}
+
+    if biodiversity == "Unknown":
+        biodiversity_risk = []
+
+        if any(t.metric == "land_use" and t.state == "monoculture" for t in triggered):
+            biodiversity_risk.append(
+                "Monoculture may reduce habitat and vegetation diversity."
+            )
+
+        if water_availability == "Low":
+            biodiversity_risk.append(
+                "Low water availability may increase ecological stress."
+            )
+
+        uncertainty["biodiversity"] = {
+            "status": "Insufficient direct measurement",
+            "reason": "No direct biodiversity indicator was provided.",
+            "risk_indicators": biodiversity_risk,
+            "data_needed": [
+                "species richness",
+                "habitat diversity",
+                "pollinator diversity",
+                "vegetation diversity",
+            ],
+        }
+
+    if human_impact == "Unknown":
+        detected_pressures = []
+
+        if any(t.metric == "land_use" and t.state == "monoculture" for t in triggered):
+            detected_pressures.append("Monoculture land use")
+
+        uncertainty["human_impact"] = {
+            "status": "Insufficient direct measurement",
+            "reason": "No direct human-impact severity indicator was provided.",
+            "detected_pressures": detected_pressures,
+            "data_needed": [
+                "deforestation",
+                "land fragmentation",
+                "pollution",
+                "urbanization",
+                "agricultural pressure",
+            ],
+        }
+
     return {
         "soil_health": soil_health,
         "water_availability": water_availability,
         "biodiversity": biodiversity,
         "climate_stress": climate_stress,
         "human_impact": human_impact,
+        "uncertainty": uncertainty,
         "raw_state": state,
     }
 
